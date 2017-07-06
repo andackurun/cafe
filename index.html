@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, height=device-height, width=device-width" />
+    <link href="kendo/styles/kendo.mobile.all.min.css" rel="stylesheet" />
+    <link href="styles/main.css" rel="stylesheet" />
+
+
+
+    <script src="cordova.js"></script>
+	<script src="Plugins/PushPlugin-master/www/PushNotification.js"></script>
+    <script src="kendo/js/jquery.min.js"></script>
+    <script src="kendo/js/kendo.mobile.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADL5Hii8naNuLldKtYQ8j8s591Z43zbrE&sensor=true"></script>
+
+    <script src="scripts/app.js"></script>
+    <script src="scripts/login.js"></script>
+    <script src="scripts/location.js"></script>
+    <script src="scripts/weather.js"></script>
+	<script src="scripts/fileHelper.js"></script>
+	<script src="scripts/fsquare.js"></script>
+	<script src="scripts/questions.js"></script>
+	
+    <style>
+        html .km-wp-light .km-content,
+        html .km-wp-light .km-button,
+        html .km-wp-light .km-navbar,
+        html .km-wp-light .km-detail,
+        html .km-wp-light *:not(.k-label) > input:not(.k-input),
+        html .km-wp-light .k-dropdown,
+        html .km-wp-light *:not(.k-label) > textarea,
+        html .km-wp-light *:not(.k-label) > select {
+            background: #fff;
+        }
+    </style>
+	
+</head>
+<body>
+    <!--Home-->
+    <div id="tabstrip-home"
+        data-role="view"
+		>
+		<div style="text-align:center;">
+			
+			<div id="hastane" style="display:inline;">
+				<a id="ekol" onclick="getImage()" data-role="button" style="text-align:center; width:100px;">Ekol Hastane</a>
+				<a id="trakya" onclick="getImage2()" data-role="button" style="text-align:center; width:100px; margin-left:40px;">Özel Trakya Hastane</a>
+			</div>
+			<div id="img" style="display:none; text-align:center">
+				<img src="http://r8app.com/company_icons/4b5ff2ec1b6ae8332e090e49f7400b6a.jpg" style=" height:240px;"></img>
+            </div>
+			<div id="img2" style="display:none; text-align:center">
+				<img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTCTT91q4UoEpGNwnI6H61f37YVoXOpYIYWoc6WT41uZhdqyHTXvQ" style=" height:240px;"></img>
+            </div>
+        </div>
+		<br>
+		<br>
+		<div class="view-content" style="text-align:center;">
+			<a id="acilServis" onclick="setValue(this)"  data-role="button" style="text-align:center; width:200px;" value="1">Acil Servis</a>
+			<br>
+			<br>
+			<a id="ayaktaHasta" onclick="setValue(this)"  data-role="button" style="text-align:center; width:200px;" value="2">Ayakta Hasta</a>
+			<br>
+			<br>
+			<a id="yatanHasta" onclick="setValue(this)"  data-role="button" style="text-align:center; width:200px;" value="3">Yatan Hasta</a>
+			        
+        </div>
+    </div>
+	
+	<!-- Popup div -->
+	<div id="checkinPopup" data-role="modalview" style="width:90%; height: 15em;" data-open="app.fSquareService.onInit" data-model="app.fSquareService.viewModel" >
+		<div data-role="header">
+            <div data-role="navbar" style="background-color:#10aade;">
+				<a id="back-button" data-icon="back" class="nav-button" data-align="left" data-role="button" data-click="closeModalViewLogin" style="border:none;color:#FFF;"></a>
+                <span data-role="view-title">&nbsp;</span>
+				<button id="makingCheckIn" data-role="button" data-align="right" style="color:#FFF;" data-bind="click:makeCheckIn" >Check-in Yap</button>
+            </div>
+        </div>
+		<ul data-role="listview" data-type="flat">
+			<li>
+				<div style="height:20px; width:95%">
+			
+        		</div>
+            </li>
+        </ul>
+		
+		<div style="text-align:center;">
+			<input type="text" id="text" style="border:1; width:95%; padding:5px;" placeholder="Ne yapıyorsun" />
+        </div>
+		
+    </div>
+ <!--
+			<textarea id="text" rows="10" placeholder="Ne yapıyorsun?" style="border:none; width:95%; padding:5px;"  >	
+            </textarea> -->
+    <!--Login --> 
+    <div id="tabstrip-loginn"
+        data-role="view"
+        data-title="Login"
+		data-model="app.loginService.viewModel">
+
+        <div class="view-content">
+            <div class="logo"></div>
+            <h3 data-bind="invisible: isLoggedIn">Enter your credentials:</h3>
+            <h1 class="welcome" data-bind="visible: isLoggedIn">Welcome, <span data-bind="text: username"></span>!
+            </h1>
+            <div class="buttonArea">
+                <input type="submit" id="logout" data-role="button" data-bind="click: onLogout, visible: isLoggedIn" class="login-button" value="Logout" />
+            </div>
+
+            <form data-bind="events: { keyup: checkEnter }">
+                <ul data-role="listview" data-style="inset" data-bind="invisible: isLoggedIn">
+                    <li>
+                        <label>
+                            Username
+                                <input type="text" data-bind="value: username" />
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            Password
+                                <input type="password" data-bind="value: password" />
+                        </label>
+                    </li>
+                </ul>
+
+                <div class="buttonArea">
+                    <input type="submit" id="login" data-role="button" data-bind="click: onLogin, invisible: isLoggedIn" class="login-button" value="Login" />
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!--Location-->
+    <div id="tabstrip-location"
+        data-role="view"
+        data-title="Location"
+        data-init="app.locationService.initLocation"
+        data-show="app.locationService.show"
+        data-hide="app.locationService.hide"
+        data-model="app.locationService.viewModel"
+        data-stretch="true">
+		<!--Header-->
+        <div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+        <div id="no-map" data-bind="invisible: isGoogleMapsInitialized">
+            Location requires internet connection to display the map.
+        </div>
+        <div id="map-search-wrap" data-bind="visible: isGoogleMapsInitialized">
+            <button id="map-navigate-home" data-bind="click: onNavigateHome"></button>
+            <form onsubmit="return false;">
+                <input id="map-address" type="search" data-bind="value: address" placeholder="Address" />
+                <input id="map-search" type="submit" value="" data-bind="click: onSearchAddress" />
+            </form>
+        </div>
+        <div id="map-canvas" data-bind="visible: isGoogleMapsInitialized"></div>
+
+    </div>
+
+    <!--Weather
+    <div id="tabstrip-weather"
+        data-role="view"
+        data-title="Weather"
+        data-model="app.weatherService.viewModel">
+
+        <div class="weather">
+            <p class="weather-title">20-Day Forecast</p>
+
+            <div class="separator">
+                <div class="dark"></div>
+                <div class="light"></div>
+            </div>
+
+            <ul class="forecast-list"
+                data-role="listview"
+                data-bind="source: weatherDataSource"
+                data-template="weather-forecast-template">
+            </ul>
+        </div>
+    </div> -->
+	
+	<!-- Öneri bırakma -->
+	<div id="tabstrip-tip"
+        data-role="view"
+		data-model="app.loginService.viewModel"
+		data-init="onInitTip">
+
+
+        <div>
+            <div data-role="header">
+	            <div data-role="navbar" style="background-color:#10aade;">
+					<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;color:#FFF;"></a>
+	                <span data-role="view-title">&nbsp;</span>
+					<input type="submit" id="makingTip" data-role="button" data-align="right" data-bind="click:makeTip" value="Öneri bırak" style="border:none;color:#FFF;"/>
+	            </div>
+	        </div>
+			<ul data-role="listview" data-type="flat">
+				<li>
+					<div style="height:20px; width:95%">
+				
+	        		</div>
+	            </li>
+	        </ul>
+				<div style="text-align:center;">			
+					<textarea id="tipText" rows="5" onfocus="clearContents(this);" placeholder="Ne düşünüyorsun?" style="border:none; width:95%; padding:5px;"  >	
+		            </textarea>
+		        </div>
+			<ul data-role="listview" data-type="flat">
+				<li>
+					Twitter ile paylaş
+					<input id="mobile-switch1" data-role="switch" data-change="switchChangeTwit"/>					
+                </li>
+				<li>
+					Facebook ile paylaş
+					<input id="mobile-switch2" data-role="switch" data-change="switchChangeFace"/>
+                </li>
+            </ul>
+			<div style="text-align:center;">
+			
+			</div>
+        </div>
+
+    </div>
+	
+	<div data-role="view" id="drawer-breakfast" data-title="Salatalar" >
+		<!--Header-->
+        <div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+    	<ul data-role="listview" id="flat-listview">
+			<li>Çilli Kız Salata</li>
+			<li>Akdeniz Salata</li>
+			<li>Ton Balıklı Salata</li>
+			<li>Izgara Hellim Salata</li>
+        </ul>
+	</div>
+	
+
+	
+	<div data-role="view" id="drawer-kumdakahve" data-title="Başlangıçlar" >
+		<!--Header-->
+        <div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+		<div id="baslangiclar">
+	    	<ul data-role="listview" id="flat-listview">
+				<li><img src="./styles/images/kahvalti.jpg" /><p>Kahvaltı Tabağı</p></li>
+				<li><img src="./styles/images/omlet.jpg" /><p>Omlet Çeşitleri</p></li>
+				<li><img src="./styles/images/menemen.jpg" /><p>Menemen</p></li>
+	        </ul>
+		</div>
+	</div>
+	<div data-role="view" id="drawer-kahvemenu" data-title="Tost ve Sandviçler" >
+		<!--Header-->
+        <div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+    	<ul data-role="listview" id="flat-listview">
+			<li>Kaşar Peynirli Tost</li>
+			<li>Tavuklu Tost</li>
+			<li>Ton Balıklı Sandviç</li>
+			<li>Kıtır Tavuklu Sandviç</li>
+        </ul>
+	</div>
+	
+	<div data-role="view" id="drawer-menu"  data-title="Menü" >
+		<!--Header-->
+        <div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+    	<ul data-role="listview" id="flat-listview">
+			<li><a href="#drawer-kumdakahve" data-transition="none">Başlangıçlar</a></li>
+			<li><a href="#drawer-kahvemenu" data-transition="none">Tostlar ve Sandviçler</a></li>
+			<li><a href="#drawer-breakfast" data-transition="none">Salatalar</a></li>
+			<li>Çorbalar</li>
+			<li>Ana Yemekler</li>
+			<li>Dondurma ve Tatlılar</li>
+			<li>İçecekler</li>
+        </ul>
+	</div>	
+	
+	<!-- Drawer Menu -->
+	<div data-role="drawer" id="my-drawer" style="width: 270px" 
+		data-model="app.loginService.viewModel"
+		data-show = "app.loginService.initLogin">
+	    <div id="profileLook" data-bind="visible: isLoggedIn">
+			<ul data-role="listview" data-type="group">
+				<li>
+		            <ul>
+		                <li><img id ="profileImg" src="./styles/images/halilsahin.jpg" /><h4 id="profileName">Halil Şahin</h4>
+							<a href="#myProfile">Profili Görüntüle</a>
+						</li>
+		            </ul>
+		        </li>
+			</ul>
+		</div>
+		<div data-bind="invisible: isLoggedIn" >
+			<div class="km-group-title" style="border-top: 2em solid #efeff4">
+				<div class="km-text"></div>
+            </div>
+			<div id="connection">
+				<a data-bind="click: foursquareConnect" style="border:0; background:transparent;" >
+                    <img src="./styles/images/connect-blue.png" style="width:150px; height:24px"/>
+                </a>
+				<button type="button" style=" border:0; background:transparent;"> 
+                    <img src="./styles/images/connect-mail.png" style="width:150px; height:24px"/>
+                </button>
+            </div>
+			
+		</div>
+		<ul data-role="listview" data-type="flat">
+	        <li data-icon="menu"><a onclick="reset()"  data-transition="none">Home</a>
+	        </li>
+	        <li data-icon="kampanya" ><a  href="#tabstrip-home" data-transition="none" >Kampanyalar</a>
+	        </li>
+			<li data-icon="degerlendirme"> <a href="#questionaire" data-transition="none">Değerlendirme </a>
+	        </li>
+	        <li data-icon="makeTip" data-bind="visible: isLoggedIn"><a href="#tabstrip-tip"  data-transition="none">Öneri bırak</a>
+	        </li>
+			<li data-icon="settings"><a href="#myProfile"  data-transition="none">Ayarlar</a>
+	        </li>
+			<li><p data-bind="text:accessToken"></p></li>
+	    </ul>
+	</div>
+	
+	<!-- Profile -->
+	<div id="myProfile"
+		data-role="view"
+		data-title ="Profil">
+		
+		<div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+		<div >
+			<ul data-role="listview" data-type="group">
+				<li>
+					<ul>
+						<li style="display:block; width:100%; text-align:center;">
+							<img class="imgSource"  src="./styles/images/halilsahin.jpg"/>
+							<p style="margin:0.2em;">Halil Şahin</p>
+		                 </li>
+						<li style="text-align:center;">
+					 	100 Çil Puan		
+                        </li>
+		           </ul>
+                </li>
+            </ul>
+        </div>
+		<div style="width:90%; height:150px; border-style:none; margin:0 auto; text-align:center;">
+			<a data-role="button" data-click="app.getTipsForUser" href="#userTips" style="float:left; background-color:#87CCE9; -webkit-border-radius:0px;width:50%; border-style:none; margin:0; padding:0; height:75px;">
+				<div >
+					Görüşler/Yorumlar
+                </div>
+            </a>
+			<a data-role="button" onclick="alerting()" style="float:right; background-color:#EEEEEE; -webkit-border-radius:0px;width:50%; height:75px; border-style:none;margin:0; padding:0;">
+				<div>
+					Check-in
+                </div>
+            </a>
+			<a data-role="button" data-click="alerting" style="float:left; background-color:#FAC353; -webkit-border-radius:0px;width:50%; height:75px;border-style:none;margin:0; padding:0;">
+				<div >
+					Promosyon<br>Kodları
+                </div>
+            </a>
+			<a data-role="button" onclick="alerting()" style="float:right; background-color:#81DBAE; -webkit-border-radius:0px;width:50%; height:75px; border-style:none;margin:0; padding:0;">
+				<div>
+					Değerlendirme <br> Sonuçları
+                </div>
+            </a>
+        </div>
+		
+    </div>
+	
+	<!-- Kullanıcı görüşleri -->
+	<div id="userTips"
+		data-role="view"
+		data-title="Yorumlar">
+		
+		<div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+		
+		<div>
+			<ul data-role="listview" data-type="group">
+				<li id="tipsofUser">
+					<ul>
+						<li>
+							iyi iyi
+							<br>
+							04.05.2014
+                        </li>
+						<li>
+							kötü
+                        </li>
+                    </ul>
+					
+                </li>
+            </ul>
+		
+        </div>
+		
+    </div>
+	
+	<!-- Anket Soruları -->
+	<div id="questionaire"
+		data-role="view"
+		data-title="Değerlendirme"
+		data-model="app.questionService.viewModel"
+		data-before-show="app.questionService.onInit">
+		
+		<div data-role="header">
+            <div data-role="navbar">
+				<a id="back-button" class="nav-button" data-align="left" data-role="backbutton" style="border:none;">Back</a>
+                <span data-role="view-title"></span>
+            </div>
+        </div>
+		
+		<div id="listQuestion" data-role="content">
+			<ul data-role="listview" data-style="inset" data-type="group">
+				<li id="deneQuestion" style="text-align:center;" >
+					
+                </li>
+				
+            </ul>
+		<div style="text-align:center;">
+			<a id="sendQuestion" data-role="button" style="text-align:center; width:200px;">Gönder</a>
+			<br>
+			<br>
+        </div>
+        </div>
+		
+    </div>
+	
+	<script>
+	    window.myTouch = {
+	        swipe: function(e) {if(e.direction=="left") {
+				
+							document.getElementById("touchSurface").className = "touchSurface2";
+							document.getElementById("touchSurface").innerHTML = "Çilli Kız'ı Denediniz mi?";
+            			} else if(e.direction=="right") {
+							document.getElementById("touchSurface").className = "touchSurface";
+							document.getElementById("touchSurface").innerHTML = "Günün Önerisi: Lezzet Sefası";
+                        }
+				;},
+	        
+	    }
+		
+		
+	</script>
+	<script>		
+		function closeModalViewLogin() {
+	        $("#checkinPopup").kendoMobileModalView("close");
+			
+	    }
+		
+		
+		function onInitTip(e) {			
+			document.getElementById("tipText").value='';
+			$("#tipText").focus();
+			
+		}
+		
+		function switchChangeTwit(e) {
+			if(e.checked) {
+				app.loginService.viewModel.isTwit = true;
+            }
+			else {
+				app.loginService.viewModel.isTwit = false;
+            }
+        }
+		
+		function switchChangeFace(e) {
+			if(e.checked) {
+				app.loginService.viewModel.isFace = true;
+            }
+			else {
+				app.loginService.viewModel.isFace = false;
+            }
+		}
+			
+		function alerting() {
+			navigator.notification.alert("qw", function(){}, "ok", "ok");
+        }
+		function getImage() {
+			document.getElementById("hastane").style.display = "none";
+			document.getElementById("img").style.display = "inline";
+    	}
+		
+		function getImage2() {
+			document.getElementById("hastane").style.display = "none";
+			document.getElementById("img2").style.display = "inline";
+    	}
+		
+		function setValue(e) {
+			var v = e.getAttribute('value');
+			if(v == 1) {
+				app.questionService.viewModel.catid=18;
+            }
+			else if(v == 2) {
+			//	alert(v);
+				app.questionService.viewModel.set("catid",19);	
+            }
+			else if(v == 3) {
+				app.questionService.viewModel.set("catid", 20);
+            }
+			//alert(v);
+			window.location.href="#questionaire";
+        }
+		
+		function reset() {
+			document.getElementById("hastane").style.display = "inline";
+			document.getElementById("img").style.display = "none";
+			document.getElementById("img2").style.display = "none";
+			window.location.href="#tabstrip-home";
+        }
+		
+    </script>
+
+	
+<!--
+	<script>
+		var slides = jQuery('#touchSurface'),
+		    i = 0;
+
+		slides
+		.on('swipeleft', function(e) {
+		  slides.eq(i + 1).addClass('active');
+		})
+		.on('swiperight', function(e) {
+		  slides.eq(i - 1).addClass('active');
+		});
+    </script> -->
+    <!--Weather forecast template
+    <script type="text/x-kendo-tmpl" id="weather-forecast-template">
+        <div>
+            <div class="position-left">
+                <span class="weather-info date">${day}</span>
+            </div>
+            <div class="position-right">
+                <span class="weather-info temperature high">${highTemperature}<sup>&deg;</sup></span>
+                <span class="weather-info temperature low">${lowTemperature}<sup>&deg;</sup></span>
+            </div>
+            <div class="position-center">
+                <span class="weather-icon ${image}"></span>
+            </div>
+        </div>
+    </script> -->
+
+    <!--Layout-->
+    <div data-role="layout" data-id="tabstrip-layout">
+		 
+    </div>
+</body>
+</html>
